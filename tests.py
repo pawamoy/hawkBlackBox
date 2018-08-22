@@ -118,5 +118,20 @@ class TestCombiner(unittest.TestCase):
             *[Device(rank=Rank.B)] * 2, Device(rank=Rank.A), Device(rank=Rank.S)
         ) == self.combiner.stabilizer.probabilities[(0, 2, 1, 1)]
 
+    def test_new_type(self):
+        for _ in range(1000):
+            assert self.combiner.get_new_type(
+                Device(type=Type.A),
+                Device(type=Type.A),
+                Device(type=Type.A),
+                Device(type=Type.G),
+            ) != Type.S
+            assert self.combiner.get_new_type(
+                Device(type=Type.S),
+                Device(type=Type.S),
+                Device(type=Type.S),
+                Device(type=Type.S),
+            ) == Type.S
+
     def tearDown(self):
         del self.combiner

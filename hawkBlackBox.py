@@ -203,8 +203,19 @@ class Combiner:
     def get_new_type(self, d1, d2, d3, d4):
         if d1.type == d2.type == d3.type == d4.type:
             return d1.type
-        # TODO: if 2 armor and 2 scope, 50% chance armor and 50% chance scope?
-        return Type.get_random()
+        types = {Type.S: 0, Type.A: 0, Type.G: 0}
+        types[d1.type] += 25
+        types[d2.type] += 25
+        types[d3.type] += 25
+        types[d4.type] += 25
+        chances = [(Type.S, types[Type.S])]
+        chances.append((Type.A, types[Type.A] + chances[0][1]))
+        chances.append((Type.G, types[Type.G] + chances[1][1]))
+        value = self.get_random_value()
+        for chance in chances:
+            if value <= chance[1]:
+                return chance[0]
+        raise ValueError('cannot decide type')
 
     def combine(self, d1, d2, d3, d4):
         best_device = max(d1, d2, d3, d4)
