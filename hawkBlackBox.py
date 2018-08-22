@@ -15,14 +15,14 @@ class Type:
 
 
 class Rank:
-    C = 0
-    B = 1
-    A = 2
-    S = 3
+    C = 1
+    B = 2
+    A = 3
+    S = 4
 
     @classmethod
     def get_random(cls):
-        return [cls.C, cls.B, cls.A, cls.S][random.randint(0, 3)]
+        return random.randint(1, 4)
 
     @classmethod
     def verbose(cls, rank):
@@ -42,6 +42,7 @@ class Device:
         )
 
     def __lt__(self, other):
+        print(self.rank, other.rank)
         if self.rank == other.rank:
             if self.stars < other.stars:
                 return True
@@ -114,7 +115,7 @@ class Probability:
 
 class Stabilizer:
     def __init__(self, level, probabilities):
-        self.level = 0
+        self.level = level
         self.probabilities = probabilities
 
     def __str__(self):
@@ -189,9 +190,6 @@ class Combiner:
     def get_random_value(self):
         return random.randint(1, 100)
 
-    def get_max_ranked_device(self, d1, d2, d3, d4):
-        return max(d1, d2, d3, d4)
-
     def get_new_type(self, d1, d2, d3, d4):
         if d1.type == d2.type == d3.type == d4.type:
             return d1.type
@@ -199,23 +197,21 @@ class Combiner:
         return Type.get_random()
 
     def combine(self, d1, d2, d3, d4):
+        best_device = max(d1, d2, d3, d4)
+        
         probabilities = self.stabilizer.get_probabilities(d1, d2, d3, d4)
-        max_ranked_device = self.get_max_ranked_device(d1, d2, d3, d4)
-
-        new_type = self.get_new_type(d1, d2, d3, d4)
-
         value = self.get_random_value()
         new_rank = probabilities.get_rank(value)
 
         # Algorithm here. Fix when necessary.
-        if new_rank <= max_ranked_device.rank:
+        if new_rank <= best_device.rank:
             # Device's Rank was not upgraded (same or downgraded)
 
             # Number of stars is best device's stars + 1
             # For example:
             # 1-star B + 3x0-star B => 2-star B
             # 2-star B + 3x0-star C => 3-star C
-            new_stars = max_ranked_device.stars + 1
+            new_stars = best_device.stars + 1
 
             # If 5-stars and Rank lower than S (C, B or A), upgrade Rank, 0 stars
             # Some people say there are 50/50 chance of getting 0/1 star when upgrading
@@ -227,6 +223,7 @@ class Combiner:
             # Device's Rank was upgraded (yay!): always 1-star
             new_stars = 1
 
+        new_type = self.get_new_type(d1, d2, d3, d4)
         return Device(rank=new_rank, stars=new_stars, type=new_type)
 
 
