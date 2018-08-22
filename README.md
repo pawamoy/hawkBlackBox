@@ -13,9 +13,8 @@ BtoS: From Rank B to Rank S, Same Rank / Random Type combinations
 
     This strategy always combines devices with the same Rank: 4xB, 4xA
     or 4xS. It does not take the device's type into account (they are
-    picked randomly). It starts at Rank B and goes up to Rank S. It
-    makes use of all devices to maximize the number of stars of the
-    final S-Rank devices.
+    picked randomly). It starts at Rank B and goes up to Rank S. It does
+      not try to maximize the number of stars for the final S-Rank devices.
 
     Usage:
         ./hawkBlackBox.py  BtoS  stabilizer_level  number_of_green_devices_to_start_with
