@@ -9,7 +9,7 @@ strategies.
 $ ./hawkBlackBox.py
 AVAILABLE STRATEGIES
 ============================================
-BtoS: From Rank B to Rank S, Same Rank / Random Type combinations
+btos: From Rank B to Rank S, Same Rank / Random Type combinations
 
     This strategy always combines devices with the same Rank: 4xB, 4xA
     or 4xS. It does not take the device's type into account (they are
@@ -17,16 +17,16 @@ BtoS: From Rank B to Rank S, Same Rank / Random Type combinations
     not try to maximize the number of stars for the final S-Rank devices.
 
     Usage:
-        ./hawkBlackBox.py  BtoS  stabilizer_level  number_of_green_devices_to_start_with
+        ./hawkBlackBox.py  btos  stabilizer_level  number_of_green_devices_to_start_with
 
     Example:
-        ./hawkBlackBox.py  BtoS  0  100000
+        ./hawkBlackBox.py  btos  0  100000
 ```
 
 You can call a strategy like shown in the usage (using its code name):
 
 ```console
-$ ./hawkBlackBox.py BtoS 0 100000
+$ ./hawkBlackBox.py btos 0 100000
 Running "From Rank B to Rank S, Same Rank / Random Type combinations" strategy
 With Stabilizer level 0 and 100000 B-rank devices
 

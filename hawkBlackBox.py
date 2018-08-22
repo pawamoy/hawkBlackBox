@@ -284,7 +284,7 @@ class Strategy:
 
 
 class BtoS(Strategy):
-    code = 'BtoS'
+    code = 'btos'
     name = 'From Rank B to Rank S, Same Rank / Random Type combinations'
     description = """
     This strategy always combines devices with the same Rank: 4xB, 4xA
@@ -293,11 +293,11 @@ class BtoS(Strategy):
     not try to maximize the number of stars for the final S-Rank devices.
 
     Usage:
-        ./hawkBlackBox.py  BtoS  stabilizer_level  number_of_green_devices_to_start_with
+        ./hawkBlackBox.py  {code}  stabilizer_level  number_of_green_devices_to_start_with
 
     Example:
-        ./hawkBlackBox.py  BtoS  0  100000
-    """
+        ./hawkBlackBox.py  {code}  0  100000
+    """.format(code=code)
 
     def run(self, n_B_devices):
         n_B_devices = int(n_B_devices)
@@ -408,12 +408,15 @@ class BtoS(Strategy):
         print('----------')
         print('B-rank devices used: %d' % (n_B_devices - len(B_stock)))
         print('Total combinations done: %d' % combinations)
-        print('Average number of B-rank devices to get an S-rank device: %0.2f' % ((n_B_devices - len(B_stock)) / (len(S0_stock) + len(S1_stock))))
+        try:
+            avg_b_to_s = '%0.2f' % ((n_B_devices - len(B_stock)) / (len(S0_stock) + len(S1_stock)))
+        except ZeroDivisionError:
+            avg_b_to_s = 'unknown'
+        print('Average number of B-rank devices to get an S-rank device: %s' % avg_b_to_s)
 
 
 
 Strategies = {
-    BtoS.code: BtoS,
     BtoS.code: BtoS,
 }
 
@@ -434,4 +437,4 @@ if __name__ == '__main__':
     print('AVAILABLE STRATEGIES')
     print('============================================')
     print('\n--------------------------------------------\n'.join(
-        s.get_help() for s in sorted(Strategies.values(), key=lambda s: s.name)))
+        s.get_help() for s in sorted(Strategies.values(), key=lambda s: s.code)))
