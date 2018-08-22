@@ -231,7 +231,14 @@ class Combiner:
 
 
 class Strategy:
+    code = ''
+    name = ''
+    description = ''
+
     def __init__(self, stabilizer, *args, **kwargs):
+        if isinstance(stabilizer, str):
+            stabilizer = int(stabilizer)
+
         if isinstance(stabilizer, int):
             try:
                 self.stabilizer = get_stabilizer(stabilizer)
@@ -242,17 +249,25 @@ class Strategy:
         elif isinstance(stabilizer, Stabilizer):
             self.stabilizer = stabilizer
         else:
-            print('Invalid stabilizer, aborting strategy', file=sys.stderr)
+            print('Invalid stabilizer (%s:%s), aborting strategy' % (
+                str(stabilizer), type(stabilizer)
+            ), file=sys.stderr)
             return
 
         self.run(*args, **kwargs)
 
     def __str__(self):
-        return '%s\n%s' % (self.name, self.description)
+        return '%s: %s\n%s' % (self.code, self.name, self.description)
+
+    @classmethod
+    def get_help(cls):
+        return '%s: %s\n%s' % (cls.code, cls.name, cls.description)
+
 
 
 class BtoS(Strategy):
-    name = 'B to S, Same Rank / Random Type combinations'
+    code = 'BtoS'
+    name = 'From Rank B to Rank S, Same Rank / Random Type combinations'
     description = """
     This strategy always combines devices with the same Rank: 4xB, 4xA
     or 4xS. It does not take the type device's into account (they are
@@ -261,14 +276,15 @@ class BtoS(Strategy):
     final S-Rank devices.
 
     Usage:
-        from hawkBlackBox import Strategies
-        Strategies.BtoS(stabilizer_level, number_of_green_devices_to_start_with)
+        ./hawkBlackBox.py  BtoS  stabilizer_level  number_of_green_devices_to_start_with
 
     Example:
-        Strategies.BtoS(0, 100000)
+        ./hawkBlackBox.py  BtoS  0  100000
     """
 
     def run(self, n_B_devices):
+        n_B_devices = int(n_B_devices)
+
         print('Running "%s" strategy\nWith %s and %d B-rank devices' % (
             self.name, self.stabilizer, n_B_devices))
         print('')
@@ -378,9 +394,27 @@ class BtoS(Strategy):
         print('Average number of B-rank devices to get an S-rank device: %0.2f' % ((n_B_devices - len(B_stock)) / (len(S0_stock) + len(S1_stock))))
 
 
-class Strategies:
-    BtoS = BtoS
+
+Strategies = {
+    BtoS.code: BtoS,
+    BtoS.code: BtoS,
+}
 
 
 if __name__ == '__main__':
-    BtoS(stabilizer0, 100000)
+    if len(sys.argv) > 1:
+        try:
+            strategy = Strategies[sys.argv[1]]
+            try:
+                strategy(*sys.argv[2:])
+            except TypeError as e:
+                print(str(e))
+                sys.exit(1)
+            sys.exit(0)
+        except KeyError:
+            print('No such strategy\n', file=sys.stderr)
+
+    print('AVAILABLE STRATEGIES')
+    print('============================================')
+    print('\n--------------------------------------------\n'.join(
+        s.get_help() for s in sorted(Strategies.values(), key=lambda s: s.name)))
