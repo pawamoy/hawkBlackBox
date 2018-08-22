@@ -98,15 +98,25 @@ class Stock(list):
 
 
 class Probability:
-    def __init__(self, c=0, b=0, a=0, s=0):
+    def __init__(self, c=0, b=0, a=0, s=0, extra=None, extra_cost=0):
         self.ranks = (
             (Rank.C, c),
             (Rank.B, b + c),
             (Rank.A, a + b + c),
             (Rank.S, s + a + b + c)
         )
+        if extra:
+            ec, eb, ea, es = extra
+            self.extra_ranks = (
+                (Rank.C, ec),
+                (Rank.B, eb + ec),
+                (Rank.A, ea + eb + ec),
+                (Rank.S, es + ea + eb + ec)
+            )
+            self.extra_cost = extra_cost
 
-    def get_rank(self, value):
+    def get_rank(self, value, extra=False):
+        ranks = self.extra_ranks if extra else self.ranks
         for rank in self.ranks:
             if value <= rank[1]:
                 return rank[0]
@@ -133,41 +143,41 @@ class Stabilizer:
 
 
 stabilizer0 = Stabilizer(0, {
-    (4, 0, 0, 0): Probability(50, 50, 0, 0),
-    (3, 1, 0, 0): Probability(39, 52, 8, 0),  # missing 1
-    (3, 0, 1, 0): Probability(41, 40, 13, 6),  # guessed 41
-    (3, 0, 0, 1): Probability(43, 43, 0, 14),
-    (2, 2, 0, 0): Probability(27, 55, 17, 1),  # guessed 27
-    (2, 1, 1, 0): Probability(29, 42, 23, 6),  # guessed 29
-    (2, 1, 0, 1): Probability(30, 45, 10, 15),  # guessed 30
-    (2, 0, 2, 0): Probability(30, 29, 29, 12),  # guessed 30
-    (2, 0, 1, 1): Probability(31, 31, 16, 22),  # guessed first 31
-    (2, 0, 0, 2): Probability(33, 33, 0, 33),  # missing 1
-    (1, 3, 0, 0): Probability(15, 57, 27, 1),  # guessed 15
-    (1, 2, 1, 0): Probability(15, 44, 34, 7),  # guessed 15
-    (1, 2, 0, 1): Probability(16, 47, 20, 17),  # guessed 16
-    (1, 1, 2, 0): Probability(15, 31, 40, 14),  # guessed 15
-    (1, 1, 1, 1): Probability(16, 33, 27, 24),  # guessed 16
-    (1, 1, 0, 2): Probability(18, 35, 11, 36),  # guessed 18
-    (1, 0, 3, 0): Probability(16, 16, 48, 20),  # guessed first 16
-    (1, 0, 2, 1): Probability(17, 17, 34, 32),  # guessed first 17
-    (1, 0, 1, 2): Probability(19, 18, 18, 45),  # guessed 19
-    (1, 0, 0, 3): Probability(20, 20, 0, 60),
-    (0, 4, 0, 0): Probability(0, 60, 38, 2),
-    (0, 3, 1, 0): Probability(0, 47, 45, 8),
-    (0, 3, 0, 1): Probability(0, 50, 32, 18),
-    (0, 2, 2, 0): Probability(0, 32, 53, 15),
-    (0, 2, 1, 1): Probability(0, 35, 40, 26),  # extra 1
-    (0, 2, 0, 2): Probability(0, 37, 24, 39),
-    (0, 1, 3, 0): Probability(0, 17, 61, 22),
-    (0, 1, 2, 1): Probability(0, 18, 48, 34),
-    (0, 1, 1, 2): Probability(0, 20, 32, 48),
-    (0, 1, 0, 3): Probability(0, 21, 14, 65),
-    (0, 0, 4, 0): Probability(0, 0, 70, 30),
-    (0, 0, 3, 1): Probability(0, 0, 57, 43),
-    (0, 0, 2, 2): Probability(0, 0, 41, 59),
-    (0, 0, 1, 3): Probability(0, 0, 23, 77),
-    (0, 0, 0, 4): Probability(0, 0, 0, 100),
+    (4, 0, 0, 0): Probability(50, 50, 0, 0,   (0, 92, 8, 0),   46),
+    (3, 1, 0, 0): Probability(39, 52, 8, 0,   (0, 75, 18, 7),  78),   # missing 1
+    (3, 0, 1, 0): Probability(41, 40, 13, 6,  (0, 60, 25, 15), 96),   # guessed 41
+    (3, 0, 0, 1): Probability(43, 43, 0, 14,  (0, 71, 8, 21),  123),
+    (2, 2, 0, 0): Probability(27, 55, 17, 1,  (0, 67, 26, 7),  112),  # guessed 27
+    (2, 1, 1, 0): Probability(29, 42, 23, 6,  (0, 54, 32, 14), 127),  # guessed 29
+    (2, 1, 0, 1): Probability(30, 45, 10, 15, (0, 58, 18, 24), 154),  # guessed 30
+    (2, 0, 2, 0): Probability(30, 29, 29, 12, (0, 40, 40, 21), 146),  # guessed 30, extra 1
+    (2, 0, 1, 1): Probability(31, 31, 16, 22, (0, 43, 25, 32), 173),  # guessed first 31
+    (2, 0, 0, 2): Probability(33, 33, 0, 33,  (0, 50, 8, 42),  196),  # missing 1
+    (1, 3, 0, 0): Probability(15, 57, 27, 1,  (0, 61, 32, 7),  143),  # guessed 15
+    (1, 2, 1, 0): Probability(15, 44, 34, 7,  (0, 49, 38, 13), 162),  # guessed 15
+    (1, 2, 0, 1): Probability(16, 47, 20, 17, (0, 52, 26, 22), 185),  # guessed 16
+    (1, 1, 2, 0): Probability(15, 31, 40, 14, (0, 36, 45, 19), 177),  # guessed 15
+    (1, 1, 1, 1): Probability(16, 33, 27, 24, (0, 38, 32, 29), 204),  # guessed 16, missing 1
+    (1, 1, 0, 2): Probability(18, 35, 11, 36, (0, 41, 18, 41), 227),  # guessed 18
+    (1, 0, 3, 0): Probability(16, 16, 48, 20, (0, 22, 52, 26), 196),  # guessed first 16
+    (1, 0, 2, 1): Probability(17, 17, 34, 32, (0, 23, 40, 37), 223),  # guessed first 17
+    (1, 0, 1, 2): Probability(19, 18, 18, 45, (0, 25, 25, 50), 246),  # guessed 19
+    (1, 0, 0, 3): Probability(20, 20, 0, 60,  (0, 29, 8, 62),  270),  # extra 1 with extra
+    (0, 4, 0, 0): Probability(0, 60, 38, 2,   (0, 18, 69, 14), 173),
+    (0, 3, 1, 0): Probability(0, 47, 45, 8,   (0, 0, 76, 24),  193),
+    (0, 3, 0, 1): Probability(0, 50, 32, 18,  (0, 0, 56, 44),  216),
+    (0, 2, 2, 0): Probability(0, 32, 53, 15,  (0, 0, 71, 29),  208),
+    (0, 2, 1, 1): Probability(0, 35, 40, 26,  (0, 0, 55, 45),  235),  # extra 1
+    (0, 2, 0, 2): Probability(0, 37, 24, 39,  (0, 0, 34, 66),  258),
+    (0, 1, 3, 0): Probability(0, 17, 61, 22,  (0, 0, 68, 32),  227),
+    (0, 1, 2, 1): Probability(0, 18, 48, 34,  (0, 0, 54, 46),  254),
+    (0, 1, 1, 2): Probability(0, 20, 32, 48,  (0, 0, 36, 64),  277),
+    (0, 1, 0, 3): Probability(0, 21, 14, 65,  (0, 0, 16, 84),  300),
+    (0, 0, 4, 0): Probability(0, 0, 70, 30,   (0, 0, 40, 60),  246),
+    (0, 0, 3, 1): Probability(0, 0, 57, 43,   (0, 0, 6, 94),   273),
+    (0, 0, 2, 2): Probability(0, 0, 41, 59,   (0, 0, 0, 100),  296),
+    (0, 0, 1, 3): Probability(0, 0, 23, 77,   (0, 0, 0, 100),  320),
+    (0, 0, 0, 4): Probability(0, 0, 0, 100,   (0, 0, 0, 100),  343),
 })
 
 
@@ -198,7 +208,7 @@ class Combiner:
 
     def combine(self, d1, d2, d3, d4):
         best_device = max(d1, d2, d3, d4)
-        
+
         probabilities = self.stabilizer.get_probabilities(d1, d2, d3, d4)
         value = self.get_random_value()
         new_rank = probabilities.get_rank(value)

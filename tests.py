@@ -49,18 +49,52 @@ class TestCombiner(unittest.TestCase):
         d3 = Device(rank=Rank.B, stars=0)
         d4 = Device(rank=Rank.B, stars=0)
 
+        # Patch stabilizer to avoid lucky rank upgrades
         self.combiner.stabilizer.probabilities[(0, 4, 0, 0)] = Probability(0, 100, 0, 0)
 
+        # Star increase with 3 x 0-star devices
         for stars in (0, 1, 2, 3):
-            print(d2.stars, d3.stars, d4.stars)
             assert self.combiner.combine(
                 Device(rank=Rank.B, stars=stars), d2, d3, d4
             ).stars == stars + 1
 
+        # Rank upgrade at 5 stars
         new_device = self.combiner.combine(
             Device(rank=Rank.B, stars=4), d2, d3, d4)
         assert new_device.stars == 0
         assert new_device.rank == Rank.A
+
+        # Star increase with heterogeneous-star devices
+        for stars_list in (
+            (1, 1, 0, 0),
+            (2, 1, 0, 0),
+            (2, 2, 1, 0),
+            (3, 2, 1, 1),
+            (3, 3, 3, 3)
+        ):
+            assert self.combiner.combine(
+                Device(rank=Rank.B, stars=stars_list[0]),
+                Device(rank=Rank.B, stars=stars_list[1]),
+                Device(rank=Rank.B, stars=stars_list[2]),
+                Device(rank=Rank.B, stars=stars_list[3]),
+            ).stars == max(*stars_list) + 1
+
+        # Star increase with heterogeneous-star devices and different ranks
+        self.combiner.stabilizer.probabilities[(1, 1, 1, 1)] = Probability(0, 0, 100, 0)
+        for stars_list in (
+            (4, 0, 0, 0),
+            (1, 2, 3, 0),
+            (4, 2, 1, 4),
+            (4, 4, 4, 2),
+            (0, 0, 0, 1)
+        ):
+            devices_list = [
+                Device(rank=Rank.C, stars=stars_list[0]),
+                Device(rank=Rank.B, stars=stars_list[1]),
+                Device(rank=Rank.A, stars=stars_list[2]),
+                Device(rank=Rank.S, stars=stars_list[3]),
+            ]
+            assert self.combiner.combine(*devices_list).stars == (devices_list[3].stars + 1) % 5
 
     def test_probability_rank(self):
         p = Probability(10, 25, 50, 15)
